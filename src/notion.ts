@@ -59,8 +59,19 @@ export async function saveVocabularyEntry(data: WordPageData): Promise<SavedWord
         date: { start: today },
       },
     },
-    children: buildPageBlocks(data) as any,
+    children: buildPageBlocks(data).slice(0, 100) as any,
   })
+
+  // Append remaining blocks if over 100
+  const allBlocks = buildPageBlocks(data)
+  if (allBlocks.length > 100) {
+    for (let i = 100; i < allBlocks.length; i += 100) {
+      await getNotion().blocks.children.append({
+        block_id: page.id,
+        children: allBlocks.slice(i, i + 100) as any,
+      })
+    }
+  }
 
   const url = `https://notion.so/${(page.id as string).replace(/-/g, '')}`
   return { word: data.word, notionPageUrl: url }

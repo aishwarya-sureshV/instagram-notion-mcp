@@ -129,7 +129,7 @@ export function buildPageBlocks(data: WordPageData): any[] {
 
     // ── 8. Next Words to Learn ──────────────────────────────────────────────
     h2('📚 Next Words to Learn'),
-    ...data.nextWords.flatMap(w => [
+    ...(data.nextWords ?? []).flatMap(w => [
       bullet([bold(w.word), plain(` — ${w.howDifferent}`)]),
       bullet([italic(w.example)]),
     ]),
@@ -137,12 +137,12 @@ export function buildPageBlocks(data: WordPageData): any[] {
 
     // ── 9. Collocations ─────────────────────────────────────────────────────
     h2('🔗 Collocations — Words that naturally go with it'),
-    ...data.collocations.map(c => bullet([bold(c.phrase), plain(` — ${c.meaning}`)])),
+    ...(data.collocations ?? []).map(c => bullet([bold(c.phrase), plain(` — ${c.meaning}`)])),
     divider(),
 
     // ── 10. Common Mistakes ─────────────────────────────────────────────────
     h2('⚠️ Common Mistakes — How NOT to use it'),
-    ...data.commonMistakes.map(m => bullet([plain(m)])),
+    ...(data.commonMistakes ?? []).map(m => bullet([plain(m)])),
 
   ]
 }
