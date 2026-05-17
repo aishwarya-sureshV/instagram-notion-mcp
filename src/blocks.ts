@@ -122,6 +122,9 @@ export function buildPageBlocks(data: WordPageData): any[] {
     quote([plain('🎯 '), bold('Start with: '), italic(data.takeaway.startWith)]),
     quote([plain('🚀 '), bold('Level up: '), plain(data.takeaway.levelUp)]),
     quote([boldItalic(`"${data.takeaway.powerMove}"`)]),
+    ...(data.takeaway.replacePhrase
+      ? [quote([plain('💬 '), bold('Replace: '), italic(`"${data.takeaway.replacePhrase}"`), plain(` → `), bold(`"${data.word}"`)])]
+      : []),
     divider(),
 
     // ── 8. Next Words to Learn ──────────────────────────────────────────────

@@ -32,6 +32,7 @@ export interface WordPageData {
     startWith: string
     levelUp: string
     powerMove: string
+    replacePhrase: string
   }
   nextWords: Array<{ word: string; howDifferent: string; example: string }>
   collocations: Array<{ phrase: string; meaning: string }>
@@ -172,7 +173,8 @@ Return ONLY valid JSON matching this exact structure:
     "useIt": "brief note on how common/versatile the word is and in what contexts it shines",
     "startWith": "\\"key phrase 1\\" or \\"key phrase 2\\"",
     "levelUp": "the adverb form, opposite, or a closely related word worth learning next",
-    "powerMove": "a short quotable contrast sentence using format: '[Subject] is [word] by [group A], but [contrasting action] by [group B]' — under 15 words, stage-worthy, memorable"
+    "powerMove": "a short quotable contrast sentence using format: '[Subject] is [word] by [group A], but [contrasting action] by [group B]' — under 15 words, stage-worthy, memorable",
+    "replacePhrase": "if this word can replace a common everyday phrase, give that phrase (e.g. 'changes very quickly and unpredictably' for volatile). If no natural phrase fits, return empty string."
   },
 
   "nextWords": [
@@ -182,20 +184,17 @@ Return ONLY valid JSON matching this exact structure:
   ],
 
   "collocations": [
-    { "phrase": "adjective + word or word + noun", "meaning": "short meaning or sample phrase" },
-    { "phrase": "collocation 2", "meaning": "short meaning" },
-    { "phrase": "collocation 3", "meaning": "short meaning" },
-    { "phrase": "collocation 4", "meaning": "short meaning" },
-    { "phrase": "collocation 5", "meaning": "short meaning" },
-    { "phrase": "collocation 6", "meaning": "short meaning" },
-    { "phrase": "collocation 7", "meaning": "short meaning" },
-    { "phrase": "collocation 8", "meaning": "short meaning" }
+    { "phrase": "most natural collocation 1", "meaning": "short meaning or sample phrase" },
+    { "phrase": "most natural collocation 2", "meaning": "short meaning" },
+    { "phrase": "most natural collocation 3", "meaning": "short meaning" },
+    { "phrase": "most natural collocation 4", "meaning": "short meaning" },
+    { "phrase": "most natural collocation 5", "meaning": "short meaning" }
   ],
 
   "commonMistakes": [
-    "Don't... [mistake 1 — wrong context or tone]",
-    "Don't... [mistake 2 — wrong collocation or grammar]",
-    "Don't... [mistake 3 — overuse or sounds unnatural]"
+    "Don't... [mistake 1]",
+    "Don't... [mistake 2]",
+    "Don't... [mistake 3]"
   ]
 }`,
     `Word: ${word} (${pronunciation})\n\nSource context (from Instagram reel):\n${sourceContext}`,
