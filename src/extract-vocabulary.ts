@@ -191,13 +191,7 @@ Return ONLY valid JSON matching this exact structure:
     { "phrase": "most natural collocation 5", "meaning": "short meaning" }
   ],
 
-  "commonMistakes": [
-    "Don't [specific mistake] — [brief reason]. Where helpful add: ✅ correct use / ❌ wrong use as a short inline example.",
-    "Don't [specific mistake about context, tone, or register] — [brief reason with example if useful].",
-    "Don't [specific mistake about collocation, grammar, or overuse] — [brief reason].",
-    "Don't [specific mistake unique to this word's common misuse] — [brief reason].",
-    "Don't [fifth mistake if genuinely useful, otherwise omit] — [brief reason]."
-  ]
+  "commonMistakes": ["mistake 1", "mistake 2", "mistake 3", "mistake 4", "mistake 5"]
 }`,
     `Word: ${word} (${pronunciation})\n\nSource context (from Instagram reel):\n${sourceContext}`,
     4000,
