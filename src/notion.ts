@@ -153,7 +153,7 @@ export async function rebuildPageBody(pageId: string, data: WordPageData): Promi
     })
   }
 
-  // Update card properties too
+  // Update card properties — reset Simple replacement to placeholder so user fills manually
   await getNotion().pages.update({
     page_id: pageId,
     properties: {
@@ -161,7 +161,7 @@ export async function rebuildPageBody(pageId: string, data: WordPageData): Promi
         rich_text: [{ text: { content: data.meaning } }],
       },
       'Simple replacement': {
-        rich_text: [{ text: { content: data.alternatives[0] ? `use ${data.word} instead of "${data.alternatives[0].instead}"` : '' }, annotations: { bold: false, italic: true, strikethrough: false, underline: false, code: false, color: 'default' } }],
+        rich_text: [{ text: { content: '💭' }, annotations: { bold: false, italic: false, strikethrough: false, underline: false, code: false, color: 'gray' } }],
       },
     },
   })
