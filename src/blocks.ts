@@ -64,9 +64,7 @@ export function buildPageBlocks(data: WordPageData): any[] {
     // ── 3. Word Family ──────────────────────────────────────────────────────
     h2('👨‍👩‍👧 Word Family'),
     table(3, [
-      // header row
       [cell(plain('Form')), cell(plain('Word')), cell(plain('Example'))],
-      // data rows
       ...data.wordFamily.map(row => [
         cell(plain(row.form)),
         cell(bold(row.word)),
@@ -108,7 +106,7 @@ export function buildPageBlocks(data: WordPageData): any[] {
     // ── 6. Everyday Alternatives ────────────────────────────────────────────
     h2('🔄 Everyday Alternatives'),
     table(2, [
-      [cell(plain(`Instead of ${data.word}`)), cell(plain('Use when…'))],
+      [cell(plain('Instead of saying...')), cell(plain(`Use "${data.word}" when…`))],
       ...data.alternatives.map(row => [
         cell(italic(`"${row.instead}"`)),
         cell(plain(row.useWhen)),
@@ -123,6 +121,25 @@ export function buildPageBlocks(data: WordPageData): any[] {
     quote([plain('✅ '), bold('Use it actively'), plain(` — ${data.takeaway.useIt}`)]),
     quote([plain('🎯 '), bold('Start with: '), italic(data.takeaway.startWith)]),
     quote([plain('🚀 '), bold('Level up: '), plain(data.takeaway.levelUp)]),
+    quote([boldItalic(`"${data.takeaway.powerMove}"`)]),
+    divider(),
+
+    // ── 8. Next Words to Learn ──────────────────────────────────────────────
+    h2('📚 Next Words to Learn'),
+    ...data.nextWords.flatMap(w => [
+      bullet([bold(w.word), plain(` — ${w.howDifferent}`)]),
+      bullet([italic(w.example)]),
+    ]),
+    divider(),
+
+    // ── 9. Collocations ─────────────────────────────────────────────────────
+    h2('🔗 Collocations — Words that naturally go with it'),
+    ...data.collocations.map(c => bullet([bold(c.phrase), plain(` — ${c.meaning}`)])),
+    divider(),
+
+    // ── 10. Common Mistakes ─────────────────────────────────────────────────
+    h2('⚠️ Common Mistakes — How NOT to use it'),
+    ...data.commonMistakes.map(m => bullet([plain(m)])),
 
   ]
 }

@@ -31,7 +31,11 @@ export interface WordPageData {
     useIt: string
     startWith: string
     levelUp: string
+    powerMove: string
   }
+  nextWords: Array<{ word: string; howDifferent: string; example: string }>
+  collocations: Array<{ phrase: string; meaning: string }>
+  commonMistakes: string[]
 }
 
 // ── Client ────────────────────────────────────────────────────────────────────
@@ -74,8 +78,9 @@ export async function extractWords(
 
   const raw = await ask(
     `Extract English vocabulary words worth learning from Instagram content.
-Focus on: advanced, nuanced, or uncommon words; idioms; phrasal verbs.
-Skip basic words (good, nice, go, said, very, etc.)
+
+INCLUDE: advanced, nuanced, or uncommon words that feel natural in everyday conversation, professional speech, social situations, or thoughtful speaking.
+EXCLUDE: basic words (good, nice, go, said, very) AND words that are mainly poetic, literary, archaic, overly academic, ceremonial, or unnatural in spoken English. No dictionary-showoff words.
 
 Return ONLY a JSON array:
 [{ "word": "the word", "pronunciation": "phonetic syllable breakdown with stress in CAPS — use actual sounds not spelling, e.g. coveted→KUV-ih-tid, formidable→FOR-mih-duh-bul, ephemeral→ih-FEM-er-ul" }]
@@ -155,10 +160,10 @@ Return ONLY valid JSON matching this exact structure:
   ],
 
   "alternatives": [
-    { "instead": "simpler word 1", "useWhen": "casual / simple" },
-    { "instead": "simpler word 2", "useWhen": "general use" },
-    { "instead": "simpler word 3", "useWhen": "formal" },
-    { "instead": "simpler word 4", "useWhen": "informal but vivid" }
+    { "instead": "most common everyday word people use instead", "useWhen": "when to use this simpler word instead" },
+    { "instead": "second common alternative", "useWhen": "when this works better" },
+    { "instead": "third common alternative", "useWhen": "when this works better" },
+    { "instead": "fourth common alternative", "useWhen": "when this works better" }
   ],
 
   "alternativesParagraph": "One paragraph explaining exactly when to choose this word over the simpler alternatives — what does it add that the simpler words don't?",
@@ -166,8 +171,32 @@ Return ONLY valid JSON matching this exact structure:
   "takeaway": {
     "useIt": "brief note on how common/versatile the word is and in what contexts it shines",
     "startWith": "\\"key phrase 1\\" or \\"key phrase 2\\"",
-    "levelUp": "the adverb form, opposite, or a closely related word worth learning next"
-  }
+    "levelUp": "the adverb form, opposite, or a closely related word worth learning next",
+    "powerMove": "a short quotable contrast sentence using format: '[Subject] is [word] by [group A], but [contrasting action] by [group B]' — under 15 words, stage-worthy, memorable"
+  },
+
+  "nextWords": [
+    { "word": "related word 1", "howDifferent": "one line on how it differs from the main word", "example": "natural example sentence" },
+    { "word": "related word 2", "howDifferent": "one line on how it differs", "example": "natural example sentence" },
+    { "word": "related word 3", "howDifferent": "one line on how it differs", "example": "natural example sentence" }
+  ],
+
+  "collocations": [
+    { "phrase": "adjective + word or word + noun", "meaning": "short meaning or sample phrase" },
+    { "phrase": "collocation 2", "meaning": "short meaning" },
+    { "phrase": "collocation 3", "meaning": "short meaning" },
+    { "phrase": "collocation 4", "meaning": "short meaning" },
+    { "phrase": "collocation 5", "meaning": "short meaning" },
+    { "phrase": "collocation 6", "meaning": "short meaning" },
+    { "phrase": "collocation 7", "meaning": "short meaning" },
+    { "phrase": "collocation 8", "meaning": "short meaning" }
+  ],
+
+  "commonMistakes": [
+    "Don't... [mistake 1 — wrong context or tone]",
+    "Don't... [mistake 2 — wrong collocation or grammar]",
+    "Don't... [mistake 3 — overuse or sounds unnatural]"
+  ]
 }`,
     `Word: ${word} (${pronunciation})\n\nSource context (from Instagram reel):\n${sourceContext}`,
     2500,
