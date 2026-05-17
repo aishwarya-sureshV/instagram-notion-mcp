@@ -1,0 +1,11 @@
+node_modules/
+dist/
+.env
+.mcp-use/
+*.mp3
+*.mp4
+*.jpg
+*.png
+*.webp
+eng.traineddata
+/tmp/
