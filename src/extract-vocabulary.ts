@@ -192,13 +192,15 @@ Return ONLY valid JSON matching this exact structure:
   ],
 
   "commonMistakes": [
-    "Don't... [mistake 1]",
-    "Don't... [mistake 2]",
-    "Don't... [mistake 3]"
+    "Don't [specific mistake] — [brief reason]. Where helpful add: ✅ correct use / ❌ wrong use as a short inline example.",
+    "Don't [specific mistake about context, tone, or register] — [brief reason with example if useful].",
+    "Don't [specific mistake about collocation, grammar, or overuse] — [brief reason].",
+    "Don't [specific mistake unique to this word's common misuse] — [brief reason].",
+    "Don't [fifth mistake if genuinely useful, otherwise omit] — [brief reason]."
   ]
 }`,
     `Word: ${word} (${pronunciation})\n\nSource context (from Instagram reel):\n${sourceContext}`,
-    2500,
+    4000,
   )
 
   const json = raw.replace(/^```(?:json)?\n?/m, '').replace(/\n?```$/m, '').trim()
