@@ -9,3 +9,4 @@ dist/
 *.webp
 eng.traineddata
 /tmp/
+.env.local

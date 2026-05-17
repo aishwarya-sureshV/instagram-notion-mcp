@@ -1,4 +1,4 @@
-import OpenAI from 'openai'
+import Anthropic from '@anthropic-ai/sdk'
 import { jsonrepair } from 'jsonrepair'
 
 // ── Types ─────────────────────────────────────────────────────────────────────
@@ -36,11 +36,23 @@ export interface WordPageData {
 
 // ── Client ────────────────────────────────────────────────────────────────────
 
-let client: OpenAI
+let client: Anthropic
 
-function getClient(): OpenAI {
-  if (!client) client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY })
+function getClient(): Anthropic {
+  if (!client) client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
   return client
+}
+
+const MODEL = 'claude-sonnet-4-6'
+
+async function ask(system: string, user: string, maxTokens: number): Promise<string> {
+  const response = await getClient().messages.create({
+    model: MODEL,
+    max_tokens: maxTokens,
+    system,
+    messages: [{ role: 'user', content: user }],
+  })
+  return response.content[0].type === 'text' ? response.content[0].text : ''
 }
 
 // ── Step 1: Extract words from reel content ───────────────────────────────────
@@ -60,13 +72,8 @@ export async function extractWords(
 
   if (!combinedText.trim()) return []
 
-  const response = await getClient().chat.completions.create({
-    model: 'gpt-4o',
-    max_tokens: 500,
-    messages: [
-      {
-        role: 'system',
-        content: `Extract English vocabulary words worth learning from Instagram content.
+  const raw = await ask(
+    `Extract English vocabulary words worth learning from Instagram content.
 Focus on: advanced, nuanced, or uncommon words; idioms; phrasal verbs.
 Skip basic words (good, nice, go, said, very, etc.)
 
@@ -74,12 +81,10 @@ Return ONLY a JSON array:
 [{ "word": "the word", "pronunciation": "syllable breakdown with stress in CAPS e.g. FOR-mih-duh-bul" }]
 
 If no words worth saving, return [].`,
-      },
-      { role: 'user', content: combinedText },
-    ],
-  })
+    combinedText,
+    500,
+  )
 
-  const raw = response.choices[0]?.message?.content ?? ''
   try {
     const json = raw.replace(/^```(?:json)?\n?/m, '').replace(/\n?```$/m, '').trim()
     return JSON.parse(jsonrepair(json)) as ExtractedWord[]
@@ -91,18 +96,12 @@ If no words worth saving, return [].`,
 // ── Step 1b: Get pronunciation for a manually provided word ──────────────────
 
 export async function getPronunciation(word: string): Promise<string> {
-  const response = await getClient().chat.completions.create({
-    model: 'gpt-4o',
-    max_tokens: 50,
-    messages: [
-      {
-        role: 'system',
-        content: 'Return ONLY the syllable-stress pronunciation of the given English word, using CAPS for the stressed syllable. Example: "formidable" → "FOR-mih-duh-bul". Return nothing else.',
-      },
-      { role: 'user', content: word },
-    ],
-  })
-  return response.choices[0]?.message?.content?.trim() ?? word
+  const raw = await ask(
+    'Return ONLY the syllable-stress pronunciation of the given English word, using CAPS for the stressed syllable. Example: "formidable" → "FOR-mih-duh-bul". Return nothing else.',
+    word,
+    50,
+  )
+  return raw.trim() || word
 }
 
 // ── Step 2: Generate full 7-section page content for one word ─────────────────
@@ -112,13 +111,8 @@ export async function generateWordPageContent(
   pronunciation: string,
   sourceContext: string,
 ): Promise<WordPageData> {
-  const response = await getClient().chat.completions.create({
-    model: 'gpt-4o',
-    max_tokens: 2500,
-    messages: [
-      {
-        role: 'system',
-        content: `You are an expert English vocabulary teacher using Norman Lewis's Word Power Made Easy method.
+  const raw = await ask(
+    `You are an expert English vocabulary teacher using Norman Lewis's Word Power Made Easy method.
 Generate a complete, rich vocabulary page for the given word.
 
 Return ONLY valid JSON matching this exact structure:
@@ -165,15 +159,10 @@ Return ONLY valid JSON matching this exact structure:
     "levelUp": "the adverb form, opposite, or a closely related word worth learning next"
   }
 }`,
-      },
-      {
-        role: 'user',
-        content: `Word: ${word} (${pronunciation})\n\nSource context (from Instagram reel):\n${sourceContext}`,
-      },
-    ],
-  })
+    `Word: ${word} (${pronunciation})\n\nSource context (from Instagram reel):\n${sourceContext}`,
+    2500,
+  )
 
-  const raw = response.choices[0]?.message?.content ?? ''
   const json = raw.replace(/^```(?:json)?\n?/m, '').replace(/\n?```$/m, '').trim()
   const data = JSON.parse(jsonrepair(json))
   return { word, pronunciation, ...data } as WordPageData
@@ -196,25 +185,15 @@ export async function rewriteWordEntry(
     ? `\n\nUse this entry as your style/format reference:\n${JSON.stringify(referenceEntry, null, 2)}`
     : ''
 
-  const response = await getClient().chat.completions.create({
-    model: 'gpt-4o',
-    max_tokens: 1500,
-    messages: [
-      {
-        role: 'system',
-        content: `You are an expert English vocabulary teacher. Modify the given vocabulary entry per the instruction.${referenceSection}
+  const raw = await ask(
+    `You are an expert English vocabulary teacher. Modify the given vocabulary entry per the instruction.${referenceSection}
 
 Return ONLY valid JSON:
 { "meaning": "...", "usage": "...", "howToRemember": "..." }`,
-      },
-      {
-        role: 'user',
-        content: `Entry:\n${JSON.stringify(entry, null, 2)}\n\nInstruction: ${instruction}`,
-      },
-    ],
-  })
+    `Entry:\n${JSON.stringify(entry, null, 2)}\n\nInstruction: ${instruction}`,
+    1500,
+  )
 
-  const raw = response.choices[0]?.message?.content ?? ''
   const json = raw.replace(/^```(?:json)?\n?/m, '').replace(/\n?```$/m, '').trim()
   return JSON.parse(jsonrepair(json)) as RewrittenFields
 }
