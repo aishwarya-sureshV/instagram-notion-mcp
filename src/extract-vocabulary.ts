@@ -78,7 +78,7 @@ Focus on: advanced, nuanced, or uncommon words; idioms; phrasal verbs.
 Skip basic words (good, nice, go, said, very, etc.)
 
 Return ONLY a JSON array:
-[{ "word": "the word", "pronunciation": "syllable breakdown with stress in CAPS e.g. FOR-mih-duh-bul" }]
+[{ "word": "the word", "pronunciation": "phonetic syllable breakdown with stress in CAPS — use actual sounds not spelling, e.g. coveted→KUV-ih-tid, formidable→FOR-mih-duh-bul, ephemeral→ih-FEM-er-ul" }]
 
 If no words worth saving, return [].`,
     combinedText,
@@ -97,7 +97,17 @@ If no words worth saving, return [].`,
 
 export async function getPronunciation(word: string): Promise<string> {
   const raw = await ask(
-    'Return ONLY the syllable-stress pronunciation of the given English word, using CAPS for the stressed syllable. Example: "formidable" → "FOR-mih-duh-bul". Return nothing else.',
+    `Generate the correct phonetic pronunciation of the given English word using syllable-stress notation (CAPS = stressed syllable).
+
+Rules:
+- Use actual phonetic sounds, NOT spelling patterns
+- Short vowels: "cup"→UH, "bit"→IH, "bet"→EH, "hot"→AH, "foot"→UU
+- Long vowels: "cape"→AY, "feet"→EE, "kite"→Y, "rope"→OH, "cute"→YOO
+- Common traps: "cov" sounds like UH (cover), not OH; "ou" in "touch" = UH; "ea" in "bread" = EH
+- Break into natural spoken syllables, not dictionary syllables
+- Examples: "coveted"→KUV-ih-tid, "formidable"→FOR-mih-duh-bul, "ephemeral"→ih-FEM-er-ul, "egregious"→ih-GREE-jus
+
+Return ONLY the pronunciation, nothing else.`,
     word,
     50,
   )
