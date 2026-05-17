@@ -4,7 +4,7 @@ import { fetchInstagramPost } from './instagram.js'
 import { transcribeVideo } from './transcribe.js'
 import { extractTextFromImages } from './ocr.js'
 import { extractWords, generateWordPageContent, getPronunciation, rewriteWordEntry } from './extract-vocabulary.js'
-import { isDuplicate, saveVocabularyEntry, searchVocabulary, getWordEntry, getAllWordEntries, updateWordFields } from './notion.js'
+import { isDuplicate, saveVocabularyEntry, searchVocabulary, getWordEntry, getAllWordEntries, updateWordFields, rebuildPageBody } from './notion.js'
 
 const server = new MCPServer({
   name: 'instagram-vocabulary',
@@ -167,7 +167,58 @@ server.tool(
   },
 )
 
-// ── Tool 5: modify_vocabulary_entry ──────────────────────────────────────────
+// ── Tool 5: rebuild_word_page ─────────────────────────────────────────────────
+
+server.tool(
+  {
+    name: 'rebuild_word_page',
+    description: 'Fully regenerate the vocabulary page for one or more words — rewrites all 10 sections and updates card properties with fresh AI-generated content. Use when the user says "rewrite [word]", "rebuild [word]", or "rewrite all".',
+    schema: z.object({
+      target: z.string().describe('Word to rebuild, comma-separated list of words, or "all" to rebuild every page'),
+    }),
+  },
+  async ({ target }) => {
+    const isAll = target.toLowerCase().trim() === 'all'
+    const entries = isAll
+      ? await getAllWordEntries()
+      : await Promise.all(
+          target.split(',').map(w => getWordEntry(w.trim()))
+        ).then(results => results.filter(Boolean) as Awaited<ReturnType<typeof getWordEntry>>[])
+
+    if (entries.length === 0) {
+      return {
+        content: [{ type: 'text' as const, text: `No matching words found for "${target}".` }],
+      }
+    }
+
+    const rebuilt: string[] = []
+    const failed: string[] = []
+
+    for (const entry of entries) {
+      if (!entry) continue
+      try {
+        const rawWord = entry.word.replace(/\s*\(.*?\)/, '').trim()
+        const pronunciation = entry.word.match(/\((.+?)\)/)?.[1] ?? ''
+        const pageData = await generateWordPageContent(rawWord, pronunciation, '')
+        await rebuildPageBody(entry.pageId, pageData)
+        rebuilt.push(rawWord)
+      } catch (e) {
+        failed.push(entry?.word ?? '?')
+      }
+    }
+
+    const lines = [
+      `Rebuilt **${rebuilt.length}** page(s): ${rebuilt.join(', ')}`,
+      failed.length > 0 ? `Failed: ${failed.join(', ')}` : '',
+    ].filter(Boolean)
+
+    return {
+      content: [{ type: 'text' as const, text: lines.join('\n') }],
+    }
+  },
+)
+
+// ── Tool 6: modify_vocabulary_entry ──────────────────────────────────────────
 
 server.tool(
   {

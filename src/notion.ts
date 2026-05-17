@@ -130,6 +130,43 @@ export async function getAllWordEntries(): Promise<WordEntry[]> {
   return results
 }
 
+export async function rebuildPageBody(pageId: string, data: WordPageData): Promise<void> {
+  // Delete all existing blocks
+  let cursor: string | undefined
+  do {
+    const response: any = await getNotion().blocks.children.list({
+      block_id: pageId,
+      ...(cursor ? { start_cursor: cursor } : {}),
+    })
+    for (const block of response.results as any[]) {
+      await getNotion().blocks.delete({ block_id: block.id })
+    }
+    cursor = response.has_more ? response.next_cursor : undefined
+  } while (cursor)
+
+  // Append new blocks in chunks of 100
+  const blocks = buildPageBlocks(data) as any[]
+  for (let i = 0; i < blocks.length; i += 100) {
+    await getNotion().blocks.children.append({
+      block_id: pageId,
+      children: blocks.slice(i, i + 100),
+    })
+  }
+
+  // Update card properties too
+  await getNotion().pages.update({
+    page_id: pageId,
+    properties: {
+      Meaning: {
+        rich_text: [{ text: { content: data.meaning } }],
+      },
+      'Simple replacement': {
+        rich_text: [{ text: { content: data.alternatives[0] ? `use ${data.word} instead of "${data.alternatives[0].instead}"` : '' }, annotations: { bold: false, italic: true, strikethrough: false, underline: false, code: false, color: 'default' } }],
+      },
+    },
+  })
+}
+
 export async function updateWordFields(
   pageId: string,
   fields: Partial<{ meaning: string; usage: string; rememberEasily: string }>,
